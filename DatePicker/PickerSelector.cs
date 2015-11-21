@@ -155,8 +155,8 @@ namespace DatePicker
             foreach (PickerSelectorItem pickerSelectorItem in this.itemsPanel.Children)
             {
                 DateTimeWrapper currentValue = (DateTimeWrapper)pickerSelectorItem.DataContext;
-                pickerSelectorItem.IsSelected = ((DateTimeWrapper) selectedValue).DateTime ==
-                                                ((DateTimeWrapper) currentValue).DateTime;
+                pickerSelectorItem.IsSelected = ((DateTimeWrapper)selectedValue).DateTime ==
+                                                ((DateTimeWrapper)currentValue).DateTime;
                 if (pickerSelectorItem.IsSelected)
                     selectedPickerSelectorItem = pickerSelectorItem;
             }

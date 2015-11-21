@@ -28,8 +28,6 @@ namespace DatePicker
     public sealed class DatePicker : Control
     {
         private const string PrimarySelectorName = "PART_PrimarySelector";
-        private const string SecondarySelectorName = "PART_SecondarySelector";
-        private const string TertiarySelectorName = "PART_TertiarySelector";
 
         private PickerSelector primarySelector;
 
@@ -44,8 +42,6 @@ namespace DatePicker
             get { return (Double)GetValue(SmallFontSizeProperty); }
             set { SetValue(SmallFontSizeProperty, value); }
         }
-
-
 
         public Boolean EnableFirstTapHasFocusOnly
         {
@@ -111,26 +107,12 @@ namespace DatePicker
         {
             this.DefaultStyleKey = typeof(DatePicker);
             this.InitializationInProgress = true;
-            this.LayoutUpdated += OnLayoutUpdated;
-            this.Loaded += OnLoaded;
-        }
-
-        private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
-        {
-            if (primarySelector != null)
-                primarySelector.IsFocused = false;
         }
 
         /// <summary>
         /// Get boundaries on each selector
         /// </summary>
-        private void OnLayoutUpdated(object sender, object o)
-        {
-            if (primarySelector != null)
-                primarySelector.RectPosition = primarySelector.TransformToVisual(this).TransformBounds(new Rect(0, 0, primarySelector.DesiredSize.Width, primarySelector.DesiredSize.Height));
 
-            this.LayoutUpdated -= OnLayoutUpdated;
-        }
 
         private void RefreshRect()
         {
@@ -216,6 +198,7 @@ namespace DatePicker
                     primarySelector.IsFocused = true;
                 return;
             }
+
         }
 
 
@@ -244,66 +227,10 @@ namespace DatePicker
                 primarySelector.CreateOrUpdateItems(wrapper.DateTime);
             }
 
-            this.ResetPickersOrder();
+            this.primarySelector.Visibility = Visibility.Visible;
 
             this.InitializationInProgress = false;
         }
-
-        public void ResetPickersOrder()
-        {
-            // Position and reveal the culture-relevant selectors
-            int column = 0;
-            foreach (PickerSelector selector in GetSelectorsOrderedByCulturePattern())
-            {
-                Grid.SetColumn(selector, column);
-                selector.Visibility = Visibility.Visible;
-                column++;
-            }
-        }
-
-        /// <summary>
-        /// Gets a sequence of LoopingSelector parts ordered according to culture string for date/time formatting.
-        /// </summary>
-        /// <returns>LoopingSelectors ordered by culture-specific priority.</returns>
-        internal IEnumerable<PickerSelector> GetSelectorsOrderedByCulturePattern()
-        {
-            return GetSelectorsOrderedByCulturePattern(
-                CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern,
-                new[] { 'y' },
-                new[] { primarySelector });
-
-        }
-
-        /// <summary>
-        /// Gets a sequence of LoopingSelector parts ordered according to culture string for date/time formatting.
-        /// </summary>
-        /// <param name="pattern">Culture-specific date/time format string.</param>
-        /// <param name="patternCharacters">Date/time format string characters for the primary/secondary/tertiary LoopingSelectors.</param>
-        /// <param name="selectors">Instances for the primary/secondary/tertiary LoopingSelectors.</param>
-        /// <returns>LoopingSelectors ordered by culture-specific priority.</returns>
-        internal IEnumerable<PickerSelector> GetSelectorsOrderedByCulturePattern(string pattern, char[] patternCharacters, PickerSelector[] selectors)
-        {
-            if (null == pattern)
-                throw new ArgumentNullException("pattern");
-            if (null == patternCharacters)
-                throw new ArgumentNullException("patternCharacters");
-            if (null == selectors)
-                throw new ArgumentNullException("selectors");
-            if (patternCharacters.Length != selectors.Length)
-                throw new ArgumentException("Arrays must contain the same number of elements.");
-
-            // Create a list of index and selector pairs
-            var pairs = new List<Tuple<int, PickerSelector>>(patternCharacters.Length);
-
-            for (int i = 0; i < patternCharacters.Length; i++)
-                pairs.Add(new Tuple<int, PickerSelector>(pattern.IndexOf(patternCharacters[i]), selectors[i]));
-
-            // Return the corresponding selectors in order
-            return pairs.Where(p => -1 != p.Item1).OrderBy(p => p.Item1).Select(p => p.Item2).Where(s => null != s);
-        }
-
-
-
 
     }
     public enum ScrollAction
