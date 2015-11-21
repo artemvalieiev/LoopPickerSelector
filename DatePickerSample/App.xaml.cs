@@ -43,7 +43,7 @@ namespace DatePickerSample
         {
             // Change current application language
             Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "en-US";
-  
+
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -67,7 +67,7 @@ namespace DatePickerSample
                 // When the navigation stack isn't restored navigate to the first page,
                 // configuring the new page by passing required information as a navigation
                 // parameter
-                if (!rootFrame.Navigate(typeof(MenuPage), args.Arguments))
+                if (!rootFrame.Navigate(typeof(SimpleDatePicker), args.Arguments))
                 {
                     throw new Exception("Failed to create initial page");
                 }
