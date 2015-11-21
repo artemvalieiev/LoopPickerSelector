@@ -68,7 +68,7 @@ namespace DatePicker
 
             DateTimeWrapper dateTimeWrapper = this.SelectedItem as DateTimeWrapper;
 
-            this.Value = dateTimeWrapper.DateTime;
+            this.SelectedItem = dateTimeWrapper;
             this.CreateOrUpdateItems(((DateTime)dateTimeWrapper.DateTime));
             this.GetItemsPanel().ScrollToSelectedIndex(this.GetSelectedPickerSelectorItem(), TimeSpan.Zero);
 
@@ -271,7 +271,7 @@ namespace DatePicker
             if (dateTimeWrapper == null)
                 return;
 
-            this.Value = dateTimeWrapper.DateTime;
+            this.SelectedItem = dateTimeWrapper;
 
             PickerSelectorItem middleItem = this.itemsPanel.GetMiddleItem();
 
@@ -438,51 +438,6 @@ namespace DatePicker
             FocusPickerSelector(position, FocusSourceType.Manipulation);
         }
 
-
-        public DateTime Value
-        {
-            get
-            {
-                var t = GetValue(ValueProperty);
-                if (t == null)
-                    SetValue(ValueProperty, DateTime.Today);
-
-                return (DateTime)GetValue(ValueProperty);
-            }
-            set
-            {
-                DateTime dt = new DateTime(value.Year, value.Month, value.Day);
-                SetValue(ValueProperty, dt);
-            }
-        }
-
-        // Using a DependencyProperty as the backing store for Value.  This enables animation, styling, binding, etc...
-        internal static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register("Value", typeof(DateTime), typeof(PickerSelector),
-                new PropertyMetadata(DateTime.Today, OnValueChanged));
-
-
-        private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var selector = (PickerSelector)d;
-
-            if (selector.InitializationInProgress)
-                return;
-
-            if (e.OldValue == null)
-                return;
-
-            if (e.NewValue == e.OldValue)
-                return;
-
-
-            if (selector != null)
-            {
-                selector.SelectedItem = new DateTimeWrapper((DateTime)e.NewValue);
-            }
-        }
-
-
         public Boolean EnableFirstTapHasFocusOnly
         {
             get { return (Boolean)GetValue(EnableFirstTapHasFocusOnlyProperty); }
@@ -501,17 +456,9 @@ namespace DatePicker
 
             this.InitializationInProgress = true;
 
-
-
-            // Create wrapper on current value
-            var wrapper = new DateTimeWrapper(Value);
-
-            // Init Selectors
-
-
             this.YearDataSource = new YearDataSource();
             this.DataSourceType = DataSourceType.Year;
-            this.CreateOrUpdateItems(wrapper.DateTime);
+            this.CreateOrUpdateItems((this.SelectedItem as DateTimeWrapper)?.DateTime ?? DateTime.Today);
 
 
             this.Visibility = Visibility.Visible;
