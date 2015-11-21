@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -24,12 +25,6 @@ namespace DatePicker
     public class PickerSelector : ItemsControl
     {
         internal Boolean InitializationInProgress { get; set; }
-
-        // Type of listbox (Day, Month, Year)
-        public DataSourceType DataSourceType { get; set; }
-        public YearDataSource YearDataSource { get; set; }
-        public MonthDataSource MonthDataSource { get; set; }
-        public DayDataSource DayDataSource { get; set; }
         public Rect RectPosition { get; set; }
 
         // Parent date picker 
@@ -47,18 +42,18 @@ namespace DatePicker
             if (!this.IsFocused && EnableFirstTapHasFocusOnly)
                 return;
 
-            FrameworkElement fxElement = e.OriginalSource as FrameworkElement;
+            FrameworkElement tappedFrameworkElement = e.OriginalSource as FrameworkElement;
 
-            if (fxElement == null) return;
+            if (tappedFrameworkElement == null) return;
 
-            var dtw = fxElement.DataContext as DateTimeWrapper;
+            var tappedItem = tappedFrameworkElement.DataContext;
 
-            if (dtw == null) return;
+            if (tappedItem == null) return;
 
-            if (this.SelectedItem != null && (this.SelectedItem as DateTimeWrapper).DateTime == dtw.DateTime)
+            if (this.SelectedItem != null && this.SelectedItem == tappedItem)
                 return;
 
-            this.SelectedItem = dtw;
+            this.SelectedItem = tappedItem;
 
             RefreshRect();
 
@@ -66,11 +61,10 @@ namespace DatePicker
             FocusPickerSelector(point, FocusSourceType.Tap);
 
 
-            DateTimeWrapper dateTimeWrapper = this.SelectedItem as DateTimeWrapper;
+            this.SelectedItem = tappedItem;
 
-            this.SelectedItem = dateTimeWrapper;
-            this.CreateOrUpdateItems(((DateTime)dateTimeWrapper.DateTime));
-            this.GetItemsPanel().ScrollToSelectedIndex(this.GetSelectedPickerSelectorItem(), TimeSpan.Zero);
+            var selectedItemContainer = (PickerSelectorItem)ContainerFromItem(tappedItem);
+            GetItemsPanel().ScrollToSelectedIndex(selectedItemContainer, TimeSpan.Zero);
 
         }
 
@@ -185,20 +179,11 @@ namespace DatePicker
 
             foreach (PickerSelectorItem pickerSelectorItem in this.itemsPanel.Children)
             {
-                DateTimeWrapper currentValue = (DateTimeWrapper)pickerSelectorItem.DataContext;
-                pickerSelectorItem.IsSelected = ((DateTimeWrapper)selectedValue).DateTime ==
-                                                ((DateTimeWrapper)currentValue).DateTime;
-                if (pickerSelectorItem.IsSelected)
-                    selectedPickerSelectorItem = pickerSelectorItem;
+                var currentValue = pickerSelectorItem.DataContext;
+                pickerSelectorItem.IsSelected = selectedValue.Equals(currentValue);
             }
         }
 
-        private PickerSelectorItem selectedPickerSelectorItem;
-
-        internal PickerSelectorItem GetSelectedPickerSelectorItem()
-        {
-            return selectedPickerSelectorItem;
-        }
 
         /// <summary>
         /// Overridden. Creates or identifies the element that is used to display the given item.
@@ -229,12 +214,13 @@ namespace DatePicker
 
             // get the item
             PickerSelectorItem loopListItem = element as PickerSelectorItem;
-            DateTimeWrapper dateTimeWrapper = item as DateTimeWrapper;
 
-            if (loopListItem == null || dateTimeWrapper == null)
+
+            if (loopListItem == null || item == null)
                 return;
 
-            if (this.ItemTemplate == null) return;
+            if (this.ItemTemplate == null)
+                return;
 
             // load data templated
             var contentElement = this.ItemTemplate.LoadContent() as FrameworkElement;
@@ -245,7 +231,7 @@ namespace DatePicker
             loopListItem.Style = ItemContainerStyle;
             loopListItem.DataContext = item;
             loopListItem.Content = contentElement;
-            loopListItem.IsSelected = dateTimeWrapper == this.SelectedItem;
+            loopListItem.IsSelected = item == this.SelectedItem;
             loopListItem.IsFocused = this.IsFocused;
 
         }
@@ -261,23 +247,12 @@ namespace DatePicker
             if (itemsPanel == null)
                 return;
 
-            PickerSelectorItem selectorItem = itemsPanel.GetMiddleItem();
+            PickerSelectorItem middleItem = itemsPanel.GetMiddleItem();
 
-            if (selectorItem == null)
+            if (middleItem == null || middleItem.DataContext == null)
                 return;
 
-            DateTimeWrapper dateTimeWrapper = selectorItem.DataContext as DateTimeWrapper;
-
-            if (dateTimeWrapper == null)
-                return;
-
-            this.SelectedItem = dateTimeWrapper;
-
-            PickerSelectorItem middleItem = this.itemsPanel.GetMiddleItem();
-
-            if (middleItem == null) return;
-
-            this.SelectedItem = middleItem.DataContext as DateTimeWrapper;
+            this.SelectedItem = middleItem.DataContext;
 
             base.OnManipulationCompleted(e);
 
@@ -292,137 +267,6 @@ namespace DatePicker
             return item is PickerSelectorItem;
 
         }
-
-
-        /// <summary>
-        /// Get the first available date and the max (28, 29 30 or 31 for Day per example)
-        /// </summary>
-        private DateTime GetFirstAvailable(DateTime dateTime, out int newMax)
-        {
-            DateTime firstAvailableDate = dateTime;
-            newMax = 0;
-            switch (this.DataSourceType)
-            {
-                case DataSourceType.Year:
-                    firstAvailableDate = this.YearDataSource.GetFirstAvailableDate(dateTime);
-                    newMax = this.YearDataSource.GetNumberOfItems(dateTime);
-                    break;
-                case DataSourceType.Month:
-                    firstAvailableDate = this.MonthDataSource.GetFirstAvailableDate(dateTime);
-                    newMax = this.MonthDataSource.GetNumberOfItems(dateTime);
-                    break;
-                case DataSourceType.Day:
-                    firstAvailableDate = this.DayDataSource.GetFirstAvailableDate(dateTime);
-                    newMax = this.DayDataSource.GetNumberOfItems(dateTime);
-                    break;
-            }
-
-            return firstAvailableDate;
-        }
-
-        /// <summary>
-        /// Update Items. Used for days
-        /// </summary>
-        internal void CreateOrUpdateItems(DateTime dateTime)
-        {
-            if (this.Items == null)
-                return;
-
-            DateTimeWrapper selectedDateTimeWrapper = null;
-            int newMax;
-            DateTime firstAvailableDate = GetFirstAvailable(dateTime, out newMax);
-
-            // Make a copy without any minutes / seconds ...
-            DateTimeWrapper newData =
-                new DateTimeWrapper(new DateTime(firstAvailableDate.Year,
-                    firstAvailableDate.Month,
-                    firstAvailableDate.Day));
-
-            // One item is deleted but was selected..
-            // Don't forget to reactivate a selected item
-            Boolean oneItemMustBeDeletedAndIsSelected = false;
-
-            // If new month have less day than last month
-            if (newMax < this.Items.Count)
-            {
-                int numberOfLastDaysToDelete = this.Items.Count - newMax;
-                for (int cpt = 0; cpt < numberOfLastDaysToDelete; cpt++)
-                {
-                    PickerSelectorItem item =
-                        this.ItemContainerGenerator.ContainerFromItem(this.Items[this.Items.Count - 1]) as
-                            PickerSelectorItem;
-
-                    if (item == null)
-                        continue;
-
-                    if (item.IsSelected)
-                        oneItemMustBeDeletedAndIsSelected = true;
-
-                    this.Items.RemoveAt(this.Items.Count - 1);
-
-                }
-            }
-
-
-            for (int i = 0; i < newMax; i++)
-            {
-
-                // -----------------------------------------------------------------------------
-                // Add or Update Items
-                // -----------------------------------------------------------------------------
-                if (this.Items.Count <= i)
-                {
-                    this.Items.Add(newData);
-                }
-                else
-                {
-                    // Verify the item already exists
-                    var itemDate = ((DateTimeWrapper)this.Items[i]).DateTime;
-
-                    if (itemDate != newData.DateTime)
-                        this.Items[i] = newData;
-                }
-
-                // -----------------------------------------------------------------------------
-                // Get the good selected itm
-                // -----------------------------------------------------------------------------
-                if (newData.DateTime == dateTime)
-                    selectedDateTimeWrapper = newData;
-
-                // -----------------------------------------------------------------------------
-                // Get the next data, relative to original wrapper, then relative to firstWrapper
-                // -----------------------------------------------------------------------------
-                DateTime? nextData = null;
-
-                // Get nex date
-                switch (this.DataSourceType)
-                {
-                    case DataSourceType.Year:
-                        nextData = this.YearDataSource.GetNext(dateTime, firstAvailableDate, i + 1);
-                        break;
-                    case DataSourceType.Month:
-                        nextData = this.MonthDataSource.GetNext(dateTime, firstAvailableDate, i + 1);
-                        break;
-                    case DataSourceType.Day:
-                        nextData = this.DayDataSource.GetNext(dateTime, firstAvailableDate, i + 1);
-                        break;
-                }
-                if (nextData == null)
-                    break;
-
-                newData = nextData.Value.ToDateTimeWrapper();
-            }
-
-            // Set the correct Selected Item
-            if (selectedDateTimeWrapper != null)
-                this.SelectedItem = selectedDateTimeWrapper;
-            else if (oneItemMustBeDeletedAndIsSelected)
-                // When 31 was selected and we are on a Month < 31 days (February, April ...)
-                this.SelectedItem = (DateTimeWrapper)this.Items[this.Items.Count - 1];
-            else
-                this.SelectedItem = (DateTimeWrapper)this.Items[0];
-        }
-
 
         protected override void OnManipulationStarted(ManipulationStartedRoutedEventArgs e)
         {
@@ -456,10 +300,9 @@ namespace DatePicker
 
             this.InitializationInProgress = true;
 
-            this.YearDataSource = new YearDataSource();
-            this.DataSourceType = DataSourceType.Year;
-            this.CreateOrUpdateItems((this.SelectedItem as DateTimeWrapper)?.DateTime ?? DateTime.Today);
-
+            var dataSource = Enumerable.Range(1, 50).Select(i => i.ToString()).ToList();
+            this.ItemsSource = dataSource;
+            this.SelectedItem = dataSource.First();
 
             this.Visibility = Visibility.Visible;
 

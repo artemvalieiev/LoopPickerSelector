@@ -99,8 +99,8 @@ namespace DatePicker
 
             if (ctrl.primarySelector != null)
             {
-                ctrl.primarySelector.CreateOrUpdateItems(((DateTime)e.NewValue));
-                ctrl.primarySelector.GetItemsPanel().ScrollToSelectedIndex(ctrl.primarySelector.GetSelectedPickerSelectorItem(), TimeSpan.Zero);
+                //ctrl.primarySelector.CreateOrUpdateItems(((DateTime)e.NewValue));
+               // ctrl.primarySelector.GetItemsPanel().ScrollToSelectedIndex(ctrl.primarySelector.GetSelectedItemFromPickerSelector(), TimeSpan.Zero);
             }
         }
 
@@ -119,7 +119,7 @@ namespace DatePicker
         /// 
         protected override void OnTapped(TappedRoutedEventArgs e)
         {
-           // RefreshRect();
+            // RefreshRect();
 
             Point point = e.GetPosition(this);
             FocusPickerSelector(point, FocusSourceType.Tap);
@@ -216,10 +216,7 @@ namespace DatePicker
             // Set Datasource 
             if (primarySelector != null)
             {
-                //primarySelector.DatePicker = bull;
-                primarySelector.YearDataSource = new YearDataSource();
-                primarySelector.DataSourceType = DataSourceType.Year;
-                primarySelector.CreateOrUpdateItems(wrapper.DateTime);
+                primarySelector.ItemsSource = Enumerable.Range(1, 50).Select(i => i.ToString()).ToList();
             }
 
             this.primarySelector.Visibility = Visibility.Visible;

@@ -82,7 +82,7 @@
             <Setter.Value>
                 <DataTemplate>
                     <StackPanel Margin="5,0,0,5">
-                        <TextBlock Text="{Binding YearNumber, Mode=TwoWay}" FontSize="24" />
+                        <TextBlock Foreground="Red" Text="{Binding  Mode=TwoWay}" FontSize="24" />
                         <TextBlock Text=" "  FontSize="24"  />
                     </StackPanel>
                 </DataTemplate>
@@ -170,6 +170,6 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style> 
-  
+    </Style>
+
 </ResourceDictionary>
