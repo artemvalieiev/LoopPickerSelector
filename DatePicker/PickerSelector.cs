@@ -65,6 +65,7 @@ namespace DatePicker
         public PickerSelector()
         {
             DefaultStyleKey = typeof(PickerSelector);
+
         }
 
         private void UpdateIsFocusedItems(bool isFocused)
@@ -209,11 +210,12 @@ namespace DatePicker
         protected override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
+        }
 
-            var dataSource = Enumerable.Range(1, 50).Select(i => i.ToString()).ToList();
-            ItemsSource = dataSource;
-            SelectedItem = dataSource.First();
-
+        protected override void OnItemsChanged(object e)
+        {
+            base.OnItemsChanged(e);
+            this.SelectedItem = this.Items != null && this.Items.Any() ? this.Items[0] : null;
         }
     }
 }

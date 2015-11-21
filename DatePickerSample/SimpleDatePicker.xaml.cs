@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using DatePickerSample.Common;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -28,6 +29,12 @@ namespace DatePickerSample
             this.InitializeComponent();
             this.CurrentDateTime = new DateTime(2013, 10, 29);
             this.DataContext = this;
+            this.Loaded += async (s, e) =>
+            {
+                await Task.Delay(3000);
+                MyCollection = Enumerable.Range(1, 50).Select(i => i.ToString()).ToList();
+                this.PropertyChanged(this, new PropertyChangedEventArgs("MyCollection"));
+            };
         }
 
         /// <summary>
@@ -72,7 +79,6 @@ namespace DatePickerSample
                 {
                     this.PropertyChanged(this, new PropertyChangedEventArgs("CurrentDateTime"));
                     this.PropertyChanged(this, new PropertyChangedEventArgs("CurrentDateTimeString"));
-                    
                 }
             }
         }
@@ -83,8 +89,10 @@ namespace DatePickerSample
             {
                 return currentDateTime.ToString();
             }
-           
+
         }
+
+        public List<string> MyCollection { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
