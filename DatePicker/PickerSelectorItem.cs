@@ -41,9 +41,7 @@ namespace DatePicker
         public PickerSelectorItem()
         {
             this.DefaultStyleKey = typeof(PickerSelectorItem);
-
             this.RenderTransform = new TranslateTransform();
-
             this.RectPosition = Rect.Empty;
 
         }
@@ -95,9 +93,7 @@ namespace DatePicker
         private static void IsSelectedChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             PickerSelectorItem pickerSelectorItem = (PickerSelectorItem)dependencyObject;
-
             pickerSelectorItem.ManageVisualStates();
-
         }
 
 
@@ -115,9 +111,7 @@ namespace DatePicker
         private static void FocusChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             PickerSelectorItem pickerSelectorItem = (PickerSelectorItem)dependencyObject;
-
             pickerSelectorItem.ManageVisualStates();
-
         }
 
         /// <summary>
@@ -126,71 +120,20 @@ namespace DatePicker
         internal void ManageVisualStates(bool isAnimated = true)
         {
 
-           if (this.IsSelected)
+            if (this.IsSelected)
             {
                 VisualStateManager.GoToState(this, "Selected", isAnimated);
-                //Debug.WriteLine(GetDebugWrite() + " To Selected");
                 return;
             }
 
             if (this.IsFocused)
             {
                 VisualStateManager.GoToState(this, "Focused", isAnimated);
-                //Debug.WriteLine(GetDebugWrite() + " To Focused");
                 return;
             }
 
             VisualStateManager.GoToState(this, "UnFocused", isAnimated);
-            //Debug.WriteLine(GetDebugWrite() + " To UnFocused");
         }
-
-        //private string GetDebugWrite()
-        //{
-        //    var bottomPosition = this.GetVerticalPosition() + (this.RectPosition.Height * 2);
-        //    var topPosition = this.GetVerticalPosition() - (this.RectPosition.Height);
-
-        //    if (!(bottomPosition >= this.PickerSelector.RectPosition.Y) ||
-        //        !(topPosition <= (this.PickerSelector.RectPosition.Y + this.PickerSelector.RectPosition.Height)))
-        //        return "";
-
-        //    FrameworkElement border = VisualTreeHelper.GetChild(this, 0) as FrameworkElement;
-
-        //    var currentState = String.Empty;
-
-        //    VisualStateGroup vsg = null;
-
-        //    if ((this.DataContext as DateTimeWrapper) != null)
-        //    {
-        //        switch (this.PickerSelector.DataSourceType)
-        //        {
-        //            case DataSourceType.Day:
-        //                currentState += "Day : ";
-        //                break;
-        //            case DataSourceType.Month:
-        //                currentState += "Month : ";
-        //                break;
-        //            case DataSourceType.Year:
-        //                currentState += "Year : ";
-        //                break;
-        //        }
-
-        //        currentState += (this.DataContext as DateTimeWrapper).DateTime + " ";
-        //    }
-
-        //    if (border != null)
-        //    {
-        //        IList<VisualStateGroup> vsgCollection =
-        //            VisualStateManager.GetVisualStateGroups(border).ToList();
-
-        //        vsg = vsgCollection[0];
-
-        //        if (vsg.CurrentState != null)
-        //            currentState += vsg.CurrentState.Name;
-
-        //    }
-
-        //    return currentState;
-        //}
     }
 
 }

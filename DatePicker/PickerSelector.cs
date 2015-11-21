@@ -370,25 +370,5 @@ namespace DatePicker
             else
                 this.SelectedItem = (DateTimeWrapper)this.Items[0];
         }
-
-        //private void DebugWriteLine(string text)
-        //{
-        //    string datasource = null;
-        //    switch (this.DataSourceType)
-        //    {
-        //        case DataSourceType.Day:
-        //            datasource = "Day : ";
-        //            break;
-        //        case DataSourceType.Month:
-        //            datasource = "Month : ";
-        //            break;
-        //        case DataSourceType.Year:
-        //            datasource = "Year : ";
-        //            break;
-        //    }
-
-        //    Debug.WriteLine(datasource + text);
-        //}
-
     }
 }
