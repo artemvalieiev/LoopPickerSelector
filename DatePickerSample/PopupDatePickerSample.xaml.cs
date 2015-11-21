@@ -87,7 +87,7 @@ namespace DatePickerSample
 
         private void TodayPopupClicked(object sender, RoutedEventArgs e)
         {
-            dtPicker.Value = DateTime.Now;
+            //dtPicker.Value = DateTime.Now;
         }
     }
 }

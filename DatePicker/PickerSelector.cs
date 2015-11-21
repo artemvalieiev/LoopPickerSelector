@@ -25,7 +25,7 @@ namespace DatePicker
     public class PickerSelector : ItemsControl
     {
 
-     
+
         // Type of listbox (Day, Month, Year)
         public DataSourceType DataSourceType { get; set; }
         public YearDataSource YearDataSource { get; set; }
@@ -56,7 +56,7 @@ namespace DatePicker
 
             if (dtw == null) return;
 
-            if (this.SelectedItem != null && this.SelectedItem.DateTime == dtw.DateTime)
+            if (this.SelectedItem != null && (this.SelectedItem as DateTimeWrapper).DateTime == dtw.DateTime)
                 return;
 
             this.SelectedItem = dtw;
@@ -102,11 +102,11 @@ namespace DatePicker
 
         }
 
-        private DateTimeWrapper selectedItem;
+        private object selectedItem;
         /// <summary>
         /// Current DateTime selected
         /// </summary>
-        public DateTimeWrapper SelectedItem
+        public object SelectedItem
         {
             get
             {
@@ -141,7 +141,7 @@ namespace DatePicker
         /// <summary>
         /// Update selected or not selected items state
         /// </summary>
-        private void UpdateIsSelectedItems(DateTimeWrapper selectedValue)
+        private void UpdateIsSelectedItems(object selectedValue)
         {
             if (this.Items == null || this.Items.Count <= 0)
                 return;
@@ -155,7 +155,8 @@ namespace DatePicker
             foreach (PickerSelectorItem pickerSelectorItem in this.itemsPanel.Children)
             {
                 DateTimeWrapper currentValue = (DateTimeWrapper)pickerSelectorItem.DataContext;
-                pickerSelectorItem.IsSelected = selectedValue.DateTime == currentValue.DateTime;
+                pickerSelectorItem.IsSelected = ((DateTimeWrapper) selectedValue).DateTime ==
+                                                ((DateTimeWrapper) currentValue).DateTime;
                 if (pickerSelectorItem.IsSelected)
                     selectedPickerSelectorItem = pickerSelectorItem;
             }
@@ -176,7 +177,7 @@ namespace DatePicker
             return new PickerSelectorItem { PickerSelector = this };
         }
 
-     
+
         /// <summary>
         /// Return ItemsPanel
         /// </summary>

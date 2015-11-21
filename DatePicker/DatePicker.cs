@@ -27,7 +27,7 @@ namespace DatePicker
     [TemplatePart(Name = PrimarySelectorName, Type = typeof(PickerSelector))]
     [TemplatePart(Name = SecondarySelectorName, Type = typeof(PickerSelector))]
     [TemplatePart(Name = TertiarySelectorName, Type = typeof(PickerSelector))]
-     public sealed class DatePicker : Control
+    public sealed class DatePicker : Control
     {
         private const string PrimarySelectorName = "PART_PrimarySelector";
         private const string SecondarySelectorName = "PART_SecondarySelector";
@@ -121,7 +121,7 @@ namespace DatePicker
             }
         }
 
-      
+
         public DatePicker()
         {
             this.DefaultStyleKey = typeof(DatePicker);
@@ -198,7 +198,7 @@ namespace DatePicker
 
             if (selector != null)
             {
-                DateTimeWrapper dateTimeWrapper = selector.SelectedItem;
+                DateTimeWrapper dateTimeWrapper = selector.SelectedItem as DateTimeWrapper;
 
                 if (dateTimeWrapper == null)
                     return;
@@ -388,7 +388,7 @@ namespace DatePicker
 
 
     }
-     public enum ScrollAction
+    public enum ScrollAction
     {
         Down,
         Up
