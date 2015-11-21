@@ -30,6 +30,11 @@ namespace DatePicker
             return this.RectPosition.Y + this.GetTranslateTransform().Y;
         }
 
+        public Double GetHorizontalPosition()
+        {
+            return this.RectPosition.X + this.GetTranslateTransform().X;
+        }
+
         public TranslateTransform GetTranslateTransform()
         {
             return (TranslateTransform)this.RenderTransform;

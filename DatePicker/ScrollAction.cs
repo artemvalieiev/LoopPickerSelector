@@ -3,6 +3,8 @@ namespace DatePicker
     public enum ScrollAction
     {
         Down,
-        Up
+        Up,
+        Left,
+        Right
     }
 }

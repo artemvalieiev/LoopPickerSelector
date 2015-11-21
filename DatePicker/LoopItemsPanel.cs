@@ -12,7 +12,7 @@ namespace DatePicker.Controls
 {
     public class LoopItemsPanel : Panel
     {
-        public Orientation Orientation { get; set; }
+        public Orientation orientation;
         public event EventHandler<PickerSelectorItem> SelectedItemChanged;
 
         public ScrollAction ScrollAction { get; set; }
@@ -25,6 +25,7 @@ namespace DatePicker.Controls
 
         // item height. must be 1d to fire first arrangeoverride
         private double itemHeight = 1d;
+        private double itemWidth = 1d;
 
         // true when arrange override is ok
         private bool templateApplied;
@@ -45,12 +46,25 @@ namespace DatePicker.Controls
             }
         }
 
+        public Orientation Orientation
+        {
+            get { return orientation; }
+            set
+            {
+                orientation = value;
+                this.ManipulationMode = this.Orientation == Orientation.Vertical
+                    ? (ManipulationModes.TranslateY | ManipulationModes.TranslateInertia)
+                    : (ManipulationModes.TranslateX | ManipulationModes.TranslateInertia);
+                this.internalSlider.Orientation = value;
+            }
+        }
+
         /// <summary>
         /// Ctor
         /// </summary>
         public LoopItemsPanel()
         {
-            this.Orientation = Orientation.Vertical;
+            orientation = Orientation.Vertical;
             this.ManipulationMode = this.Orientation == Orientation.Vertical
                 ? (ManipulationModes.TranslateY | ManipulationModes.TranslateInertia)
                 : (ManipulationModes.TranslateX | ManipulationModes.TranslateInertia);
@@ -102,19 +116,29 @@ namespace DatePicker.Controls
                 if (!this.ParentDatePickerSelector.IsFocused)
                     return;
             }
-
             var positionY = args.GetPosition(this).Y;
+            var positionX = args.GetPosition(this).X;
 
             foreach (PickerSelectorItem child in this.Children)
             {
+                if (this.Orientation == Orientation.Vertical)
+                {
 
-                var childPositionY = child.GetVerticalPosition();
-                var height = child.RectPosition.Height;
+                    var childPositionY = child.GetVerticalPosition();
+                    var height = child.RectPosition.Height;
+                    if (!(positionY >= childPositionY) || !(positionY <= (childPositionY + height)))
+                        continue;
+                }
+                else
+                {
 
-                if (!(positionY >= childPositionY) || !(positionY <= (childPositionY + height))) continue;
+                    var childPositionX = child.GetHorizontalPosition();
+                    var width = child.RectPosition.Width;
+                    if (!(positionX >= childPositionX) || !(positionX <= (childPositionX + width)))
+                        continue;
+                }
 
                 this.ScrollToSelectedIndex(child, animationDuration);
-
                 break;
             }
         }
@@ -139,13 +163,17 @@ namespace DatePicker.Controls
         /// </summary>
         private void OnManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
         {
-            this.ScrollAction = e.Delta.Translation.Y > 0 ? ScrollAction.Down : ScrollAction.Up;
+            this.ScrollAction = this.Orientation == Orientation.Vertical
+                ? (e.Delta.Translation.Y > 0 ? ScrollAction.Down : ScrollAction.Up)
+                : (e.Delta.Translation.X > 0 ? ScrollAction.Right : ScrollAction.Left);
 
             // get translation
             var translation = e.Delta.Translation;
 
             // update position
-            this.internalSlider.Value += translation.Y / 2;
+
+            this.internalSlider.Value += this.Orientation == Orientation.Vertical ? translation.Y / 2 :
+                translation.X / 2;
 
         }
 
@@ -157,9 +185,14 @@ namespace DatePicker.Controls
             if (!templateApplied)
                 return;
 
-            var centerTopOffset = (this.ActualHeight / 2d) - (itemHeight) / 2d;
+            var centerTopOffset = Orientation == Orientation.Vertical
+                ? (this.ActualHeight / 2d) - (itemHeight) / 2d
+                : (this.ActualWidth / 2d) - (itemWidth) / 2d;
 
-            var deltaOffset = centerTopOffset - selectedItem.GetVerticalPosition();
+            var deltaOffset = centerTopOffset -
+                              (Orientation == Orientation.Vertical
+                                  ? selectedItem.GetVerticalPosition()
+                                  : selectedItem.GetHorizontalPosition());
 
             if (Double.IsInfinity(deltaOffset) || Double.IsNaN(deltaOffset))
                 return;
@@ -193,8 +226,16 @@ namespace DatePicker.Controls
 
                 Rect rect = uiElement.TransformToVisual(this).TransformBounds(new Rect());
 
-                if (!(middlePosition.Y <= rect.Y + uiElement.RenderSize.Height) || !(middlePosition.Y >= rect.Y))
-                    continue;
+                if (Orientation == Orientation.Vertical)
+                {
+                    if (!(middlePosition.Y <= rect.Y + uiElement.RenderSize.Height) || !(middlePosition.Y >= rect.Y))
+                        continue;
+                }
+                else
+                {
+                    if (!(middlePosition.X <= rect.X + uiElement.RenderSize.Width) || !(middlePosition.X >= rect.X))
+                        continue;
+                }
 
                 return uiElement;
             }
@@ -239,13 +280,25 @@ namespace DatePicker.Controls
         /// </summary>
         private void UpdatePositionsWithAnimationAsync(PickerSelectorItem selectedItem, Double delta, TimeSpan duration)
         {
-            animationSnap.From = selectedItem.GetTranslateTransform().Y;
-            animationSnap.To = selectedItem.GetTranslateTransform().Y + delta;
+            if (Orientation == Orientation.Vertical)
+            {
+                animationSnap.From = selectedItem.GetTranslateTransform().Y;
+                animationSnap.To = selectedItem.GetTranslateTransform().Y + delta;
+            }
+            else
+            {
+                animationSnap.From = selectedItem.GetTranslateTransform().X;
+                animationSnap.To = selectedItem.GetTranslateTransform().X + delta;
+            }
+
             animationSnap.Duration = duration;
             animationSnap.EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseInOut };
 
             internalSlider.ValueChanged -= OnOffsetChanged;
-            internalSlider.Value = selectedItem.GetTranslateTransform().Y;
+            internalSlider.Value = Orientation == Orientation.Vertical
+                ? selectedItem.GetTranslateTransform().Y
+                : selectedItem.GetTranslateTransform().X;
+
             internalSlider.ValueChanged += OnOffsetChanged;
 
             this.storyboard.Completed += (sender, o) =>
@@ -264,12 +317,14 @@ namespace DatePicker.Controls
         /// </summary>
         private void UpdatePositions(Double offsetDelta)
         {
-            Double maxLogicalHeight = this.GetItemsCount() * itemHeight;
+            var itemLegth = this.Orientation == Orientation.Vertical ? itemHeight : itemWidth;
 
-            var offset = offsetDelta % maxLogicalHeight;
+            Double maxLogicalLenght = this.GetItemsCount() * itemLegth;
+
+            var offset = offsetDelta % maxLogicalLenght;
 
             // Get the correct number item
-            Int32 itemNumberSeparator = (Int32)(Math.Abs(offset) / itemHeight);
+            Int32 itemNumberSeparator = (Int32)(Math.Abs(offset) / itemLegth);
 
             Int32 itemIndexChanging;
             Double offsetAfter;
@@ -280,16 +335,16 @@ namespace DatePicker.Controls
                 itemIndexChanging = this.GetItemsCount() - itemNumberSeparator - 1;
                 offsetAfter = offset;
 
-                if (offset % maxLogicalHeight == 0)
+                if (offset % maxLogicalLenght == 0)
                     itemIndexChanging++;
 
-                offsetBefore = offsetAfter - maxLogicalHeight;
+                offsetBefore = offsetAfter - maxLogicalLenght;
             }
             else
             {
                 itemIndexChanging = itemNumberSeparator;
                 offsetBefore = offset;
-                offsetAfter = maxLogicalHeight + offsetBefore;
+                offsetAfter = maxLogicalLenght + offsetBefore;
             }
 
             // items that must be before
@@ -311,8 +366,10 @@ namespace DatePicker.Controls
                     continue;
 
                 TranslateTransform translateTransform = loopListItem.GetTranslateTransform();
-
-                translateTransform.Y = offset;
+                if (Orientation == Orientation.Vertical)
+                    translateTransform.Y = offset;
+                else
+                    translateTransform.X = offset;
 
             }
         }
@@ -355,7 +412,10 @@ namespace DatePicker.Controls
                 if (item.IsSelected)
                     selectedItem = item;
 
-                positionTop += desiredSize.Height;
+                if (Orientation == Orientation.Vertical)
+                    positionTop += desiredSize.Height;
+                else
+                    positionLeft += desiredSize.Width;
 
             }
 
@@ -386,8 +446,16 @@ namespace DatePicker.Controls
                 //container.Measure(availableSize);
                 container.Measure(nSize);
 
-                if (itemHeight != container.DesiredSize.Height)
-                    itemHeight = container.DesiredSize.Height;
+                if (Orientation == Orientation.Vertical)
+                {
+                    if (itemHeight != container.DesiredSize.Height)
+                        itemHeight = container.DesiredSize.Height;
+                }
+                else
+                {
+                    if (itemWidth != container.DesiredSize.Width)
+                        itemWidth = container.DesiredSize.Width;
+                }
             }
 
             return nSize;

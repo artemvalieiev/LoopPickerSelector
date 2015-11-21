@@ -72,7 +72,13 @@
         </Grid>
 
         <DatePicker:PickerSelector  Background="White" HorizontalAlignment="Left" Margin="550,65,0,0" Grid.Row="1" 
-                                VerticalAlignment="Top" Height="495" Width="320" ItemsSource="{Binding MyCollection}"/>
+                                    VerticalAlignment="Top"  Width="495" Height="320" ItemsSource="{Binding MyCollection}">
+            <DatePicker:PickerSelector.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ctrl:LoopItemsPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </DatePicker:PickerSelector.ItemsPanel>
+        </DatePicker:PickerSelector>
 
 
         <Button Content="Set Date by code" HorizontalAlignment="Left" Margin="1085,145,0,0" Grid.Row="1" VerticalAlignment="Top" Click="Button_Click" Width="225"/>
