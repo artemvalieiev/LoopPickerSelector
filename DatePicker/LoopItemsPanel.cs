@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DatePicker.Common;
 using Windows.Foundation;
-using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -18,8 +12,8 @@ namespace DatePicker.Controls
 {
     public class LoopItemsPanel : Panel
     {
-        public event EventHandler<PickerSelectorItem> SelectedItemChanged; 
-    
+        public event EventHandler<PickerSelectorItem> SelectedItemChanged;
+
         public ScrollAction ScrollAction { get; set; }
 
         // hack to animate a value easely
@@ -36,16 +30,10 @@ namespace DatePicker.Controls
 
         private bool isFirstLayoutPassed;
 
-        private DatePicker parentDatePicker;
         private PickerSelector parentDatePickerSelector;
 
         private Storyboard storyboard;
         private DoubleAnimation animationSnap;
-
-        public DatePicker ParentDatePicker
-        {
-            get { return parentDatePicker ?? (parentDatePicker = this.GetVisualAncestor<DatePicker>()); }
-        }
 
         public PickerSelector ParentDatePickerSelector
         {
@@ -67,7 +55,7 @@ namespace DatePicker.Controls
             this.ManipulationCompleted += OnManipulationCompleted;
             this.Tapped += OnTapped;
             this.Loaded += OnLoaded;
-        
+
             this.sliderVertical = new Slider
             {
                 SmallChange = 0.0000000001,
@@ -105,9 +93,9 @@ namespace DatePicker.Controls
                 return;
 
             // if not focused, dont do anything
-            if (this.ParentDatePickerSelector != null && this.ParentDatePicker != null)
+            if (this.ParentDatePickerSelector != null)
             {
-                if (!this.ParentDatePickerSelector.IsFocused && this.ParentDatePicker.EnableFirstTapHasFocusOnly)
+                if (!this.ParentDatePickerSelector.IsFocused)
                     return;
             }
 
@@ -175,7 +163,7 @@ namespace DatePicker.Controls
             if (duration == TimeSpan.Zero)
                 this.sliderVertical.Value += deltaOffset;
             else
-                this.UpdatePositionsWithAnimationAsync(selectedItem,  deltaOffset, duration);
+                this.UpdatePositionsWithAnimationAsync(selectedItem, deltaOffset, duration);
 
         }
 
@@ -257,12 +245,12 @@ namespace DatePicker.Controls
             sliderVertical.ValueChanged += OnVerticalOffsetChanged;
 
             this.storyboard.Completed += (sender, o) =>
+            {
+                if (SelectedItemChanged != null)
                 {
-                    if (SelectedItemChanged != null)
-                    {
-                        SelectedItemChanged(this, selectedItem);
-                    }
-                };
+                    SelectedItemChanged(this, selectedItem);
+                }
+            };
 
             this.storyboard.RunAsync();
         }
@@ -373,14 +361,6 @@ namespace DatePicker.Controls
             {
                 this.UpdatePositions(sliderVertical.Value);
                 this.ScrollToSelectedIndex(selectedItem, TimeSpan.Zero);
-                //if (!isFirstLayoutPassed)
-                //{
-                //    this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                //                             () => this.ScrollToSelectedIndex(selectedItem, TimeSpan.Zero));
-                //}
-                //else
-                //{
-                //}
             }
 
             return finalSize;
@@ -408,28 +388,6 @@ namespace DatePicker.Controls
 
             return nSize;
         }
-
-
-        //private void DebugWriteLine(string text)
-        //{
-        //    string datasource = null;
-        //    switch (this.ParentDatePickerSelector.DataSourceType)
-        //    {
-        //        case DataSourceType.Day:
-        //            datasource = "Day : ";
-        //            break;
-        //        case DataSourceType.Month:
-        //            datasource = "Month : ";
-        //            break;
-        //        case DataSourceType.Year:
-        //            datasource = "Year : ";
-        //            break;
-        //    }
-
-        //    Debug.WriteLine(datasource + text);
-        //}
-
-
 
     }
 }
