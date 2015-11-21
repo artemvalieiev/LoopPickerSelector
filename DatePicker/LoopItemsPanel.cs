@@ -12,12 +12,13 @@ namespace DatePicker.Controls
 {
     public class LoopItemsPanel : Panel
     {
+        public Orientation Orientation { get; set; }
         public event EventHandler<PickerSelectorItem> SelectedItemChanged;
 
         public ScrollAction ScrollAction { get; set; }
 
         // hack to animate a value easely
-        private Slider sliderVertical;
+        private Slider internalSlider;
 
         private readonly TimeSpan animationDuration = TimeSpan.FromMilliseconds(400);
         internal readonly TimeSpan ShortAnimationDuration = TimeSpan.FromMilliseconds(100);
@@ -49,24 +50,27 @@ namespace DatePicker.Controls
         /// </summary>
         public LoopItemsPanel()
         {
-            this.ManipulationMode = (ManipulationModes.TranslateY | ManipulationModes.TranslateInertia);
+            this.Orientation = Orientation.Vertical;
+            this.ManipulationMode = this.Orientation == Orientation.Vertical
+                ? (ManipulationModes.TranslateY | ManipulationModes.TranslateInertia)
+                : (ManipulationModes.TranslateX | ManipulationModes.TranslateInertia);
             this.IsHitTestVisible = true;
             this.ManipulationDelta += OnManipulationDelta;
             this.ManipulationCompleted += OnManipulationCompleted;
             this.Tapped += OnTapped;
             this.Loaded += OnLoaded;
 
-            this.sliderVertical = new Slider
+            this.internalSlider = new Slider
             {
                 SmallChange = 0.0000000001,
                 Minimum = double.MinValue,
                 Maximum = double.MaxValue,
-                StepFrequency = 0.0000000001
+                StepFrequency = 0.0000000001,
+                Orientation = this.Orientation
             };
-            sliderVertical.ValueChanged += OnVerticalOffsetChanged;
+            internalSlider.ValueChanged += OnOffsetChanged;
 
             this.CreateStoryboard();
-
             this.LayoutUpdated += OnLayoutUpdated;
         }
 
@@ -141,7 +145,7 @@ namespace DatePicker.Controls
             var translation = e.Delta.Translation;
 
             // update position
-            this.sliderVertical.Value += translation.Y / 2;
+            this.internalSlider.Value += translation.Y / 2;
 
         }
 
@@ -161,7 +165,7 @@ namespace DatePicker.Controls
                 return;
 
             if (duration == TimeSpan.Zero)
-                this.sliderVertical.Value += deltaOffset;
+                this.internalSlider.Value += deltaOffset;
             else
                 this.UpdatePositionsWithAnimationAsync(selectedItem, deltaOffset, duration);
 
@@ -201,7 +205,7 @@ namespace DatePicker.Controls
         /// <summary>
         /// During an animation of the Scrollbar, update positions
         /// </summary>
-        private void OnVerticalOffsetChanged(object sender, RangeBaseValueChangedEventArgs e)
+        private void OnOffsetChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             this.UpdatePositions(e.NewValue);
         }
@@ -226,7 +230,7 @@ namespace DatePicker.Controls
 
             this.storyboard.Children.Add(animationSnap);
 
-            Storyboard.SetTarget(animationSnap, sliderVertical);
+            Storyboard.SetTarget(animationSnap, internalSlider);
             Storyboard.SetTargetProperty(animationSnap, "Value");
         }
 
@@ -240,9 +244,9 @@ namespace DatePicker.Controls
             animationSnap.Duration = duration;
             animationSnap.EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseInOut };
 
-            sliderVertical.ValueChanged -= OnVerticalOffsetChanged;
-            sliderVertical.Value = selectedItem.GetTranslateTransform().Y;
-            sliderVertical.ValueChanged += OnVerticalOffsetChanged;
+            internalSlider.ValueChanged -= OnOffsetChanged;
+            internalSlider.Value = selectedItem.GetTranslateTransform().Y;
+            internalSlider.ValueChanged += OnOffsetChanged;
 
             this.storyboard.Completed += (sender, o) =>
             {
@@ -359,7 +363,7 @@ namespace DatePicker.Controls
 
             if (selectedItem != null)
             {
-                this.UpdatePositions(sliderVertical.Value);
+                this.UpdatePositions(internalSlider.Value);
                 this.ScrollToSelectedIndex(selectedItem, TimeSpan.Zero);
             }
 

@@ -114,15 +114,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\Extensions.cs" />
-    <Compile Include="DataSource.cs" />
-    <Compile Include="DatePicker.cs" />
-    <Compile Include="DateTimeWrapper.cs" />
     <Compile Include="LoopItemsPanel.cs" />
     <Compile Include="PickerSelector.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PickerSelectorItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScrollAction.cs" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>
