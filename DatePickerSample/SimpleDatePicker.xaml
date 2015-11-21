@@ -17,7 +17,7 @@
         <x:String x:Key="AppName">Simple DatePicker sample</x:String>
         <local:DebugConverter x:Key="DebugConverter" />
 
-    
+
     </common:LayoutAwarePage.Resources>
 
     <!--
@@ -71,8 +71,14 @@
             <TextBlock x:Name="pageTitle" Grid.Column="1" Text="{StaticResource AppName}" Style="{StaticResource PageHeaderTextStyle}"/>
         </Grid>
 
-        <DatePicker:DatePicker  Background="White" HorizontalAlignment="Left" Margin="550,65,0,0" Grid.Row="1" 
-                                VerticalAlignment="Top" Height="495" Width="320" Value="{Binding CurrentDateTime, Mode=TwoWay}"/>
+        <DatePicker:PickerSelector  Background="White" HorizontalAlignment="Left" Margin="550,65,0,0" Grid.Row="1" 
+                                    VerticalAlignment="Top"  Width="495" Height="320" ItemsSource="{Binding MyCollection}">
+            <DatePicker:PickerSelector.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ctrl:LoopItemsPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </DatePicker:PickerSelector.ItemsPanel>
+        </DatePicker:PickerSelector>
 
 
         <Button Content="Set Date by code" HorizontalAlignment="Left" Margin="1085,145,0,0" Grid.Row="1" VerticalAlignment="Top" Click="Button_Click" Width="225"/>
@@ -81,6 +87,6 @@
                    TextWrapping="Wrap" Text="{Binding CurrentDateTime, Converter={StaticResource DebugConverter}}"
                    VerticalAlignment="Top" />
 
-  
+
     </Grid>
 </common:LayoutAwarePage>

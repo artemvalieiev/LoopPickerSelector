@@ -110,30 +110,18 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IPhoneDatePickerSample.xaml.cs">
-      <DependentUpon>IPhoneDatePickerSample.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MenuPage.xaml.cs">
-      <DependentUpon>MenuPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Common\BindableBase.cs" />
     <Compile Include="Common\BooleanNegationConverter.cs" />
     <Compile Include="Common\BooleanToVisibilityConverter.cs" />
     <Compile Include="Common\LayoutAwarePage.cs" />
     <Compile Include="Common\RichTextColumns.cs" />
     <Compile Include="Common\SuspensionManager.cs" />
-    <Compile Include="PopupDatePickerSample.xaml.cs">
-      <DependentUpon>PopupDatePickerSample.xaml</DependentUpon>
-    </Compile>
     <Compile Include="SimpleDatePicker.xaml.cs">
       <DependentUpon>SimpleDatePicker.xaml</DependentUpon>
     </Compile>
     <Compile Include="DebugConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualTreeHelperExtensions.cs" />
-    <Compile Include="WindowsPhoneDatePickerPage.xaml.cs">
-      <DependentUpon>WindowsPhoneDatePickerPage.xaml</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -156,27 +144,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="IPhoneDatePickerSample.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MenuPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Common\StandardStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PopupDatePickerSample.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="SimpleDatePicker.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="WindowsPhoneDatePickerPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
