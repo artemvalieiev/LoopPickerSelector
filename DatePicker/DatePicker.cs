@@ -26,35 +26,36 @@ namespace DatePicker
     /// </summary>
     [TemplatePart(Name = PrimarySelectorName, Type = typeof(PickerSelector))]
     public sealed class DatePicker : Control
-    {
+    {    /// 
         private const string PrimarySelectorName = "PART_PrimarySelector";
-
+        /// 
         private PickerSelector primarySelector;
 
-
+        /// 
         internal Boolean InitializationInProgress { get; set; }
 
+        /// 
         internal static readonly DependencyProperty SmallFontSizeProperty =
             DependencyProperty.Register("SmallFontSize", typeof(Double), typeof(DatePicker), new PropertyMetadata(default(Double)));
-
+        /// 
         public Double SmallFontSize
         {
             get { return (Double)GetValue(SmallFontSizeProperty); }
             set { SetValue(SmallFontSizeProperty, value); }
         }
-
+        /// 
         public Boolean EnableFirstTapHasFocusOnly
         {
             get { return (Boolean)GetValue(EnableFirstTapHasFocusOnlyProperty); }
             set { SetValue(EnableFirstTapHasFocusOnlyProperty, value); }
         }
-
+        /// 
         // Using a DependencyProperty as the backing store for EnableFirstTapHasFocusOnly.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty EnableFirstTapHasFocusOnlyProperty =
             DependencyProperty.Register("EnableFirstTapHasFocusOnly", typeof(Boolean), typeof(DatePicker), new PropertyMetadata(true));
 
 
-
+        ///
         /// <summary>
         /// Selected value binded
         /// </summary>
@@ -74,13 +75,14 @@ namespace DatePicker
                 SetValue(ValueProperty, dt);
             }
         }
-
+        ///
         // Using a DependencyProperty as the backing store for Value.  This enables animation, styling, binding, etc...
         internal static readonly DependencyProperty ValueProperty =
             DependencyProperty.Register("Value", typeof(DateTime), typeof(DatePicker),
             new PropertyMetadata(DateTime.Today, OnValueChanged));
 
 
+        ///
         static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             DatePicker ctrl = (DatePicker)d;
@@ -114,18 +116,10 @@ namespace DatePicker
         /// </summary>
 
 
-        private void RefreshRect()
-        {
-            if (primarySelector != null)
-                primarySelector.RectPosition = primarySelector.TransformToVisual(this).TransformBounds(new Rect(0, 0, primarySelector.DesiredSize.Width, primarySelector.DesiredSize.Height));
-
-        }
-        /// <summary>
-        /// On Tapped, make focus on the good PickerSelector
-        /// </summary>
+        /// 
         protected override void OnTapped(TappedRoutedEventArgs e)
         {
-            RefreshRect();
+           // RefreshRect();
 
             Point point = e.GetPosition(this);
             FocusPickerSelector(point, FocusSourceType.Tap);
@@ -148,16 +142,14 @@ namespace DatePicker
             }
         }
 
-        /// <summary>
-        /// On Manipulation, make focus on the good PickerSelector
-        /// </summary>
+        ///
         protected override void OnManipulationStarted(ManipulationStartedRoutedEventArgs e)
         {
             LoopItemsPanel itemsPanel = e.Container as LoopItemsPanel;
             if (itemsPanel == null)
                 return;
 
-            RefreshRect();
+            //RefreshRect();
             // fake Position to get the correct PickerSelector
             Point position = new Point(itemsPanel.ParentDatePickerSelector.RectPosition.X + 1,
                                        itemsPanel.ParentDatePickerSelector.RectPosition.Y + 1);
@@ -165,6 +157,7 @@ namespace DatePicker
             FocusPickerSelector(position, FocusSourceType.Manipulation);
         }
 
+        /// 
         protected override void OnManipulationCompleted(ManipulationCompletedRoutedEventArgs e)
         {
             LoopItemsPanel itemsPanel = e.Container as LoopItemsPanel;
@@ -185,6 +178,9 @@ namespace DatePicker
             this.Value = dateTimeWrapper.DateTime;
 
         }
+
+        ///
+
         /// <summary>
         /// Make a focus or unfocus manually on each selector
         /// </summary>
@@ -198,10 +194,9 @@ namespace DatePicker
                     primarySelector.IsFocused = true;
                 return;
             }
-
         }
 
-
+        ///
 
         /// <summary>
         /// Override of OnApplyTemplate
@@ -221,7 +216,7 @@ namespace DatePicker
             // Set Datasource 
             if (primarySelector != null)
             {
-                primarySelector.DatePicker = this;
+                //primarySelector.DatePicker = bull;
                 primarySelector.YearDataSource = new YearDataSource();
                 primarySelector.DataSourceType = DataSourceType.Year;
                 primarySelector.CreateOrUpdateItems(wrapper.DateTime);
@@ -233,26 +228,5 @@ namespace DatePicker
         }
 
     }
-    public enum ScrollAction
-    {
-        Down,
-        Up
-    }
-    public enum FocusSourceType
-    {
-        Tap,
-        Pointer,
-        Keryboard,
-        Manipulation,
-        UnFocus
-    }
-    public enum DataSourceType
-    {
-        Year,
-        Month,
-        Day,
-        Hour,
-        Minute,
-        Second
-    }
+
 }

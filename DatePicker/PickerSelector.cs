@@ -21,10 +21,9 @@ using DatePicker.Controls;
 
 namespace DatePicker
 {
-    [StyleTypedProperty(Property = "ItemContainerStyle", StyleTargetType = typeof(PickerSelectorItem))]
     public class PickerSelector : ItemsControl
     {
-
+        internal Boolean InitializationInProgress { get; set; }
 
         // Type of listbox (Day, Month, Year)
         public DataSourceType DataSourceType { get; set; }
@@ -34,7 +33,7 @@ namespace DatePicker
         public Rect RectPosition { get; set; }
 
         // Parent date picker 
-        internal DatePicker DatePicker { get; set; }
+        //internal DatePicker DatePicker { get; set; }
 
         // Items Panel
         private LoopItemsPanel itemsPanel;
@@ -45,7 +44,7 @@ namespace DatePicker
         protected override void OnTapped(TappedRoutedEventArgs e)
         {
 
-            if (!this.IsFocused && DatePicker.EnableFirstTapHasFocusOnly)
+            if (!this.IsFocused && EnableFirstTapHasFocusOnly)
                 return;
 
             FrameworkElement fxElement = e.OriginalSource as FrameworkElement;
@@ -60,7 +59,40 @@ namespace DatePicker
                 return;
 
             this.SelectedItem = dtw;
+
+            RefreshRect();
+
+            Point point = e.GetPosition(this);
+            FocusPickerSelector(point, FocusSourceType.Tap);
+
+
+            DateTimeWrapper dateTimeWrapper = this.SelectedItem as DateTimeWrapper;
+
+            this.Value = dateTimeWrapper.DateTime;
+            this.CreateOrUpdateItems(((DateTime)dateTimeWrapper.DateTime));
+            this.GetItemsPanel().ScrollToSelectedIndex(this.GetSelectedPickerSelectorItem(), TimeSpan.Zero);
+
         }
+
+        private void RefreshRect()
+        {
+            this.RectPosition =
+                this.TransformToVisual(this)
+                    .TransformBounds(new Rect(0, 0, this.DesiredSize.Width, this.DesiredSize.Height));
+        }
+
+        /// <summary>
+        /// Make a focus or unfocus manually on each selector
+        /// </summary>
+        private void FocusPickerSelector(Point point, FocusSourceType focusSourceType)
+        {
+            if (point.X > this.RectPosition.X &&
+                point.X < (this.RectPosition.X + this.RectPosition.Width))
+            {
+                this.IsFocused = true;
+            }
+        }
+
 
         public Boolean IsFocused
         {
@@ -70,7 +102,8 @@ namespace DatePicker
 
         // Using a DependencyProperty as the backing store for isFocused.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IsFocusedProperty =
-            DependencyProperty.Register("IsFocused", typeof(Boolean), typeof(PickerSelector), new PropertyMetadata(false, OnIsFocusedChanged));
+            DependencyProperty.Register("IsFocused", typeof(Boolean), typeof(PickerSelector),
+                new PropertyMetadata(false, OnIsFocusedChanged));
 
         /// <summary>
         /// When focus is set, just set IsFocused on the itemsPanel
@@ -99,20 +132,18 @@ namespace DatePicker
 
             // Set style
             this.DefaultStyleKey = typeof(PickerSelector);
+            this.InitializationInProgress = true;
 
         }
 
         private object selectedItem;
+
         /// <summary>
         /// Current DateTime selected
         /// </summary>
         public object SelectedItem
         {
-            get
-            {
-                return selectedItem;
-
-            }
+            get { return selectedItem; }
             set
             {
                 selectedItem = value;
@@ -225,6 +256,22 @@ namespace DatePicker
         /// <param name="e"></param>
         protected override void OnManipulationCompleted(ManipulationCompletedRoutedEventArgs e)
         {
+            LoopItemsPanel itemsPanel = e.Container as LoopItemsPanel;
+
+            if (itemsPanel == null)
+                return;
+
+            PickerSelectorItem selectorItem = itemsPanel.GetMiddleItem();
+
+            if (selectorItem == null)
+                return;
+
+            DateTimeWrapper dateTimeWrapper = selectorItem.DataContext as DateTimeWrapper;
+
+            if (dateTimeWrapper == null)
+                return;
+
+            this.Value = dateTimeWrapper.DateTime;
 
             PickerSelectorItem middleItem = this.itemsPanel.GetMiddleItem();
 
@@ -233,6 +280,8 @@ namespace DatePicker
             this.SelectedItem = middleItem.DataContext as DateTimeWrapper;
 
             base.OnManipulationCompleted(e);
+
+
         }
 
         /// <summary>
@@ -286,8 +335,8 @@ namespace DatePicker
             // Make a copy without any minutes / seconds ...
             DateTimeWrapper newData =
                 new DateTimeWrapper(new DateTime(firstAvailableDate.Year,
-                                                 firstAvailableDate.Month,
-                                                 firstAvailableDate.Day));
+                    firstAvailableDate.Month,
+                    firstAvailableDate.Day));
 
             // One item is deleted but was selected..
             // Don't forget to reactivate a selected item
@@ -300,7 +349,8 @@ namespace DatePicker
                 for (int cpt = 0; cpt < numberOfLastDaysToDelete; cpt++)
                 {
                     PickerSelectorItem item =
-                       this.ItemContainerGenerator.ContainerFromItem(this.Items[this.Items.Count - 1]) as PickerSelectorItem;
+                        this.ItemContainerGenerator.ContainerFromItem(this.Items[this.Items.Count - 1]) as
+                            PickerSelectorItem;
 
                     if (item == null)
                         continue;
@@ -366,10 +416,131 @@ namespace DatePicker
             // Set the correct Selected Item
             if (selectedDateTimeWrapper != null)
                 this.SelectedItem = selectedDateTimeWrapper;
-            else if (oneItemMustBeDeletedAndIsSelected) // When 31 was selected and we are on a Month < 31 days (February, April ...)
+            else if (oneItemMustBeDeletedAndIsSelected)
+                // When 31 was selected and we are on a Month < 31 days (February, April ...)
                 this.SelectedItem = (DateTimeWrapper)this.Items[this.Items.Count - 1];
             else
                 this.SelectedItem = (DateTimeWrapper)this.Items[0];
         }
+
+
+        protected override void OnManipulationStarted(ManipulationStartedRoutedEventArgs e)
+        {
+            LoopItemsPanel itemsPanel = e.Container as LoopItemsPanel;
+            if (itemsPanel == null)
+                return;
+
+            RefreshRect();
+            // fake Position to get the correct PickerSelector
+            Point position = new Point(itemsPanel.ParentDatePickerSelector.RectPosition.X + 1,
+                itemsPanel.ParentDatePickerSelector.RectPosition.Y + 1);
+
+            FocusPickerSelector(position, FocusSourceType.Manipulation);
+        }
+
+
+        public DateTime Value
+        {
+            get
+            {
+                var t = GetValue(ValueProperty);
+                if (t == null)
+                    SetValue(ValueProperty, DateTime.Today);
+
+                return (DateTime)GetValue(ValueProperty);
+            }
+            set
+            {
+                DateTime dt = new DateTime(value.Year, value.Month, value.Day);
+                SetValue(ValueProperty, dt);
+            }
+        }
+
+        // Using a DependencyProperty as the backing store for Value.  This enables animation, styling, binding, etc...
+        internal static readonly DependencyProperty ValueProperty =
+            DependencyProperty.Register("Value", typeof(DateTime), typeof(PickerSelector),
+                new PropertyMetadata(DateTime.Today, OnValueChanged));
+
+
+        private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var selector = (PickerSelector)d;
+
+            if (selector.InitializationInProgress)
+                return;
+
+            if (e.OldValue == null)
+                return;
+
+            if (e.NewValue == e.OldValue)
+                return;
+
+
+            if (selector != null)
+            {
+                selector.SelectedItem = new DateTimeWrapper((DateTime)e.NewValue);
+            }
+        }
+
+
+        public Boolean EnableFirstTapHasFocusOnly
+        {
+            get { return (Boolean)GetValue(EnableFirstTapHasFocusOnlyProperty); }
+            set { SetValue(EnableFirstTapHasFocusOnlyProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for EnableFirstTapHasFocusOnly.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty EnableFirstTapHasFocusOnlyProperty =
+            DependencyProperty.Register("EnableFirstTapHasFocusOnly", typeof(Boolean), typeof(PickerSelector),
+                new PropertyMetadata(true));
+
+
+        protected override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+
+            this.InitializationInProgress = true;
+
+
+
+            // Create wrapper on current value
+            var wrapper = new DateTimeWrapper(Value);
+
+            // Init Selectors
+
+
+            this.YearDataSource = new YearDataSource();
+            this.DataSourceType = DataSourceType.Year;
+            this.CreateOrUpdateItems(wrapper.DateTime);
+
+
+            this.Visibility = Visibility.Visible;
+
+            this.InitializationInProgress = false;
+        }
     }
+
+    public enum ScrollAction
+    {
+        Down,
+        Up
+    }
+    public enum FocusSourceType
+    {
+        Tap,
+        Pointer,
+        Keryboard,
+        Manipulation,
+        UnFocus
+    }
+    public enum DataSourceType
+    {
+        Year,
+        Month,
+        Day,
+        Hour,
+        Minute,
+        Second
+    }
+
 }

@@ -78,6 +78,16 @@
         <Setter Property="MinHeight" Value="11" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="BorderThickness" Value="1,1,1,1" />
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <StackPanel Margin="5,0,0,5">
+                        <TextBlock Text="{Binding YearNumber, Mode=TwoWay}" FontSize="24" />
+                        <TextBlock Text=" "  FontSize="24"  />
+                    </StackPanel>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
         <Setter Property="ItemsPanel">
             <Setter.Value>
                 <ItemsPanelTemplate>
@@ -151,7 +161,6 @@
                                     <StackPanel Margin="5,0,0,5">
                                         <TextBlock Text="{Binding YearNumber, Mode=TwoWay}" />
                                         <TextBlock FontSize="10" Text=" " />
-
                                     </StackPanel>
                                 </DataTemplate>
                             </dtp:PickerSelector.ItemTemplate>
