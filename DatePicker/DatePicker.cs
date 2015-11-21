@@ -28,8 +28,6 @@ namespace DatePicker
     public sealed class DatePicker : Control
     {
         private const string PrimarySelectorName = "PART_PrimarySelector";
-        private const string SecondarySelectorName = "PART_SecondarySelector";
-        private const string TertiarySelectorName = "PART_TertiarySelector";
 
         private PickerSelector primarySelector;
 
