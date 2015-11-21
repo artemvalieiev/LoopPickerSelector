@@ -25,8 +25,6 @@ namespace DatePicker
     /// Represents a page used by the DatePicker control that allows the user to choose a date (day/month/year).
     /// </summary>
     [TemplatePart(Name = PrimarySelectorName, Type = typeof(PickerSelector))]
-    [TemplatePart(Name = SecondarySelectorName, Type = typeof(PickerSelector))]
-    [TemplatePart(Name = TertiarySelectorName, Type = typeof(PickerSelector))]
     public sealed class DatePicker : Control
     {
         private const string PrimarySelectorName = "PART_PrimarySelector";
@@ -34,8 +32,7 @@ namespace DatePicker
         private const string TertiarySelectorName = "PART_TertiarySelector";
 
         private PickerSelector primarySelector;
-        private PickerSelector secondarySelector;
-        private PickerSelector tertiarySelector;
+
 
         internal Boolean InitializationInProgress { get; set; }
 
@@ -107,18 +104,6 @@ namespace DatePicker
                 ctrl.primarySelector.CreateOrUpdateItems(((DateTime)e.NewValue));
                 ctrl.primarySelector.GetItemsPanel().ScrollToSelectedIndex(ctrl.primarySelector.GetSelectedPickerSelectorItem(), TimeSpan.Zero);
             }
-
-            if (ctrl.secondarySelector != null)
-            {
-                ctrl.secondarySelector.CreateOrUpdateItems(((DateTime)e.NewValue));
-                ctrl.secondarySelector.GetItemsPanel().ScrollToSelectedIndex(ctrl.secondarySelector.GetSelectedPickerSelectorItem(), TimeSpan.Zero);
-            }
-
-            if (ctrl.tertiarySelector != null)
-            {
-                ctrl.tertiarySelector.CreateOrUpdateItems(((DateTime)e.NewValue));
-                ctrl.tertiarySelector.GetItemsPanel().ScrollToSelectedIndex(ctrl.tertiarySelector.GetSelectedPickerSelectorItem(), TimeSpan.Zero);
-            }
         }
 
 
@@ -132,10 +117,6 @@ namespace DatePicker
 
         private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
         {
-            if (secondarySelector != null)
-                secondarySelector.IsFocused = false;
-            if (tertiarySelector != null)
-                tertiarySelector.IsFocused = false;
             if (primarySelector != null)
                 primarySelector.IsFocused = false;
         }
@@ -148,12 +129,6 @@ namespace DatePicker
             if (primarySelector != null)
                 primarySelector.RectPosition = primarySelector.TransformToVisual(this).TransformBounds(new Rect(0, 0, primarySelector.DesiredSize.Width, primarySelector.DesiredSize.Height));
 
-            if (secondarySelector != null)
-                secondarySelector.RectPosition = secondarySelector.TransformToVisual(this).TransformBounds(new Rect(0, 0, secondarySelector.DesiredSize.Width, secondarySelector.DesiredSize.Height));
-
-            if (tertiarySelector != null)
-                tertiarySelector.RectPosition = tertiarySelector.TransformToVisual(this).TransformBounds(new Rect(0, 0, tertiarySelector.DesiredSize.Width, tertiarySelector.DesiredSize.Height));
-
             this.LayoutUpdated -= OnLayoutUpdated;
         }
 
@@ -161,12 +136,6 @@ namespace DatePicker
         {
             if (primarySelector != null)
                 primarySelector.RectPosition = primarySelector.TransformToVisual(this).TransformBounds(new Rect(0, 0, primarySelector.DesiredSize.Width, primarySelector.DesiredSize.Height));
-
-            if (secondarySelector != null)
-                secondarySelector.RectPosition = secondarySelector.TransformToVisual(this).TransformBounds(new Rect(0, 0, secondarySelector.DesiredSize.Width, secondarySelector.DesiredSize.Height));
-
-            if (tertiarySelector != null)
-                tertiarySelector.RectPosition = tertiarySelector.TransformToVisual(this).TransformBounds(new Rect(0, 0, tertiarySelector.DesiredSize.Width, tertiarySelector.DesiredSize.Height));
 
         }
         /// <summary>
@@ -184,16 +153,6 @@ namespace DatePicker
                            point.X < (primarySelector.RectPosition.X + primarySelector.RectPosition.Width))
             {
                 selector = primarySelector;
-            }
-            if (secondarySelector != null && point.X > secondarySelector.RectPosition.X &&
-                point.X < (secondarySelector.RectPosition.X + secondarySelector.RectPosition.Width))
-            {
-                selector = secondarySelector;
-            }
-            if (tertiarySelector != null && point.X > tertiarySelector.RectPosition.X &&
-                point.X < (tertiarySelector.RectPosition.X + tertiarySelector.RectPosition.Width))
-            {
-                selector = tertiarySelector;
             }
 
             if (selector != null)
@@ -252,34 +211,10 @@ namespace DatePicker
             if (primarySelector != null && point.X > primarySelector.RectPosition.X &&
                 point.X < (primarySelector.RectPosition.X + primarySelector.RectPosition.Width))
             {
-                if (secondarySelector != null)
-                    secondarySelector.IsFocused = false;
-                if (tertiarySelector != null)
-                    tertiarySelector.IsFocused = false;
+
                 if (primarySelector != null)
                     primarySelector.IsFocused = true;
                 return;
-            }
-            if (secondarySelector != null && point.X > secondarySelector.RectPosition.X &&
-                point.X < (secondarySelector.RectPosition.X + secondarySelector.RectPosition.Width))
-            {
-                if (primarySelector != null)
-                    primarySelector.IsFocused = false;
-                if (tertiarySelector != null)
-                    tertiarySelector.IsFocused = false;
-                if (secondarySelector != null)
-                    secondarySelector.IsFocused = true;
-                return;
-            }
-            if (tertiarySelector != null && point.X > tertiarySelector.RectPosition.X &&
-                point.X < (tertiarySelector.RectPosition.X + tertiarySelector.RectPosition.Width))
-            {
-                if (primarySelector != null)
-                    primarySelector.IsFocused = false;
-                if (secondarySelector != null)
-                    secondarySelector.IsFocused = false;
-                if (tertiarySelector != null)
-                    tertiarySelector.IsFocused = true;
             }
         }
 
@@ -295,8 +230,6 @@ namespace DatePicker
             this.InitializationInProgress = true;
 
             primarySelector = GetTemplateChild(PrimarySelectorName) as PickerSelector;
-            secondarySelector = GetTemplateChild(SecondarySelectorName) as PickerSelector;
-            tertiarySelector = GetTemplateChild(TertiarySelectorName) as PickerSelector;
 
             // Create wrapper on current value
             var wrapper = new DateTimeWrapper(Value);
@@ -309,21 +242,6 @@ namespace DatePicker
                 primarySelector.YearDataSource = new YearDataSource();
                 primarySelector.DataSourceType = DataSourceType.Year;
                 primarySelector.CreateOrUpdateItems(wrapper.DateTime);
-            }
-            if (secondarySelector != null)
-            {
-                secondarySelector.DatePicker = this;
-                secondarySelector.MonthDataSource = new MonthDataSource();
-                secondarySelector.DataSourceType = DataSourceType.Month;
-                secondarySelector.CreateOrUpdateItems(wrapper.DateTime);
-            }
-
-            if (tertiarySelector != null)
-            {
-                tertiarySelector.DatePicker = this;
-                tertiarySelector.DayDataSource = new DayDataSource();
-                tertiarySelector.DataSourceType = DataSourceType.Day;
-                tertiarySelector.CreateOrUpdateItems(wrapper.DateTime);
             }
 
             this.ResetPickersOrder();
@@ -351,8 +269,8 @@ namespace DatePicker
         {
             return GetSelectorsOrderedByCulturePattern(
                 CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern,
-                new[] { 'y', 'M', 'd' },
-                new[] { primarySelector, secondarySelector, tertiarySelector });
+                new[] { 'y' },
+                new[] { primarySelector });
 
         }
 
