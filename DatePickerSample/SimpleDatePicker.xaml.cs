@@ -19,6 +19,12 @@ using Windows.UI.Xaml.Navigation;
 
 namespace DatePickerSample
 {
+    public class CalendarData
+    {
+        public string DayOfWeek { get; set; }
+        public string MonthName { get; set; }
+        public string DayOfMonth { get; set; }
+    }
     /// <summary>
     /// A basic page that provides characteristics common to most applications.
     /// </summary>
@@ -32,8 +38,44 @@ namespace DatePickerSample
             this.Loaded += async (s, e) =>
             {
                 await Task.Delay(3000);
-                MyCollection = Enumerable.Range(1, 50).Select(i => i.ToString()).ToList();
-                this.PropertyChanged(this, new PropertyChangedEventArgs("MyCollection"));
+
+                //________________________________DateCollection___________________________________________________________________________________________
+                DateCollection = Enumerable.Range(0, 30).Select(i => new CalendarData() {
+                    MonthName = DateTime.Today.AddDays(i).ToString("MMM"),
+                    DayOfMonth =DateTime.Today.AddDays(i).ToString("dd"),
+                    DayOfWeek = DateTime.Today.AddDays(i).ToString("dddd"),
+                }).ToList();
+                DateCollection[0] = new CalendarData() { MonthName = "Today" };
+
+                //_________________________________TimeStartCollection Fill____________________________________________________________________________
+                TimeStartCollection = Enumerable.Range(0, 96).Select(i => new CalendarData()
+                {
+                    DayOfMonth = DateTime.Today.AddMinutes(i * 15).ToString("hh:mm"),
+                    DayOfWeek = DateTime.Today.AddMinutes(i * 15).ToString("tt")
+                }).ToList();
+                //________________________________TimeCountCollection Fill_______________________________________________________________________________
+                TimeCountCollection = Enumerable.Range(0, 48).Select(i => new CalendarData()
+                {
+                    DayOfMonth = DateTime.Today.AddMinutes(i * 15).ToString("hh")+" h",
+                    DayOfWeek = DateTime.Today.AddMinutes(i * 15).ToString("mm") + " MIN"
+                }).ToList();
+                for (int i = 1; i < 4; i++)
+                {
+                    TimeCountCollection[i]=
+                    new CalendarData()
+                    {
+                        DayOfMonth = DateTime.Today.AddMinutes(i * 15).ToString("mm"),
+                        DayOfWeek = " MIN"
+                    };
+                }
+                TimeCountCollection.Add(TimeCountCollection[0]);
+                TimeCountCollection.RemoveAt(0);
+//_______________________________________________________________________________________________________________
+
+
+                this.PropertyChanged(this, new PropertyChangedEventArgs("DateCollection"));
+                this.PropertyChanged(this, new PropertyChangedEventArgs("TimeStartCollection"));
+                this.PropertyChanged(this, new PropertyChangedEventArgs("TimeCountCollection"));
             };
         }
 
@@ -92,7 +134,10 @@ namespace DatePickerSample
 
         }
 
-        public List<string> MyCollection { get; set; }
+        public List<CalendarData> DateCollection { get; set; }
+
+        public List<CalendarData> TimeStartCollection { get; set; }
+        public List<CalendarData> TimeCountCollection { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

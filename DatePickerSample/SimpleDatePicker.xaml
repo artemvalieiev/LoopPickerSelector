@@ -72,10 +72,33 @@
         </Grid>
 
         <DatePicker:PickerSelector  Background="White" HorizontalAlignment="Left" Margin="550,65,0,0" Grid.Row="1" 
-                                    VerticalAlignment="Top"  Width="495" Height="320" ItemsSource="{Binding MyCollection}">
+                                    VerticalAlignment="Top"  Width="495" Height="620" ItemsSource="{Binding DateCollection}">
+            
             <DatePicker:PickerSelector.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <ctrl:LoopItemsPanel Orientation="Horizontal" />
+                    <ctrl:LoopItemsPanel Orientation="Vertical" />
+                    
+                </ItemsPanelTemplate>
+            </DatePicker:PickerSelector.ItemsPanel>
+        </DatePicker:PickerSelector>
+        <DatePicker:PickerSelector  Background="White" HorizontalAlignment="Left" Margin="750,65,0,0" Grid.Row="1" 
+                                    VerticalAlignment="Top"  Width="495" Height="620" ItemsSource="{Binding TimeStartCollection}">
+            <DatePicker:PickerSelector.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ctrl:LoopItemsPanel Orientation="Vertical" />
+
+                </ItemsPanelTemplate>
+            </DatePicker:PickerSelector.ItemsPanel>
+        </DatePicker:PickerSelector>
+        <Border Margin="-120,-190,0,0" Height="90" Width="90" Grid.Row="1" 
+                                    Background="#9E9E9E">
+            <TextBlock Text="for" Margin="5,0,0,5" VerticalAlignment="Bottom"  FontSize="25" Foreground="#5B5B5C" FontWeight="Bold"/>
+        </Border>
+        <DatePicker:PickerSelector  Background="White" HorizontalAlignment="Left" Margin="950,65,0,0" Grid.Row="1" 
+                                    VerticalAlignment="Top"  Width="495" Height="620" ItemsSource="{Binding TimeCountCollection}">
+            <DatePicker:PickerSelector.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ctrl:LoopItemsPanel Orientation="Vertical" />
                 </ItemsPanelTemplate>
             </DatePicker:PickerSelector.ItemsPanel>
         </DatePicker:PickerSelector>

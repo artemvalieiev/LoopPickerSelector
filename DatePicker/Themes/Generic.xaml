@@ -18,18 +18,22 @@
         <Setter Property="Template" >
             <Setter.Value>
                 <ControlTemplate TargetType="dtp:PickerSelectorItem">
-
-                    <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
-
+                    <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="Picker">
                                 <VisualState x:Name="Focused">
                                     <Storyboard>
                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="InnerGrid">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource DarkGrayColor}"/>
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="Black"/>
                                         </ObjectAnimationUsingKeyFrames>
                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Foreground" Storyboard.TargetName="ContentPresenter">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource WhiteColor}"/>
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="LightGray"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="BorderBrush" Storyboard.TargetName="InnerGridView">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="LightGray"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="BorderThickness" Storyboard.TargetName="InnerGridView">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="2"/>
                                         </ObjectAnimationUsingKeyFrames>
                                         <DoubleAnimation Duration="0:0:0.200" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="InnerGrid" />
                                     </Storyboard>
@@ -42,10 +46,11 @@
                                 <VisualState x:Name="Selected" >
                                     <Storyboard>
                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="InnerGrid">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource PurpleColor}"/>
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#32C6FF"/>
                                         </ObjectAnimationUsingKeyFrames>
+
                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Foreground" Storyboard.TargetName="ContentPresenter">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource WhiteColor}"/>
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="White"/>
                                         </ObjectAnimationUsingKeyFrames>
                                         <DoubleAnimation Duration="0:0:0.0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="InnerGrid" />
                                     </Storyboard>
@@ -57,14 +62,18 @@
                         <Grid x:Name="InnerGrid" 
                               Opacity="1"
                               Margin="5" 
+                              
                               Background="{StaticResource TransparentColor}">
+                            <Border Name="InnerGridView">
                             <ContentPresenter x:Name="ContentPresenter"  
+                                             
                                               Foreground="{StaticResource TransparentColor}"
                                               ContentTemplate="{TemplateBinding ContentTemplate}" 
                                               Content="{TemplateBinding Content}" 
                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
                                               Margin="{TemplateBinding Padding}" 
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Border>
                         </Grid>
                     </Border>
                 </ControlTemplate>
@@ -78,12 +87,16 @@
         <Setter Property="MinHeight" Value="11" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="BorderThickness" Value="1,1,1,1" />
+        <Setter Property="BorderBrush" Value="White"/>
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <StackPanel Margin="5">
-                        <TextBlock Foreground="Red" Text="{Binding  Mode=TwoWay}" FontSize="24" />
-                        <TextBlock Text=" "  FontSize="24"  />
+                    <StackPanel Margin="5,1,1,5">
+                        <TextBlock FontSize="22" FontWeight="Bold" >
+                            <Run Text="{Binding DayOfMonth}"/>
+                            <Run Text="{Binding MonthName}"/>
+                        </TextBlock>
+                        <TextBlock Text="{Binding DayOfWeek}" Margin="1,5,1,0" FontSize="12" />
                     </StackPanel>
                 </DataTemplate>
             </Setter.Value>
@@ -98,7 +111,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="dtp:PickerSelector">
-                    <ItemsPresenter MinWidth="91" MinHeight="101" Margin="0,0,0,0" />
+                    <ItemsPresenter MinWidth="101" MinHeight="101" Margin="0,0,0,0" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
